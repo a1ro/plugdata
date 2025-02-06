@@ -1,6 +1,6 @@
 [submodule "JUCE"]
 	path = Libraries/JUCE
-	url = https://github.com/plugdata-team/JUCE.git
+	url = https://github.com/a1ro/JUCE.git
 [submodule "Libraries/pure-data"]
 	path = Libraries/pure-data
 	url = https://github.com/plugdata-team/plugdata-pd
