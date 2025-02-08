@@ -106,7 +106,7 @@ NVGSurface::NVGSurface(PluginEditor* e)
     // kind of a hack, but works well enough
     MessageManager::callAsync([_this = SafePointer(this)] {
         if (_this) {
-            _this->vBlankAttachment = std::make_unique<VBlankAttachment>(_this.getComponent(), std::bind(&NVGSurface::render, _this.getComponent()));
+            // _this->vBlankAttachment = std::make_unique<VBlankAttachment>(_this.getComponent(), std::bind(&NVGSurface::render, _this.getComponent()));
         }
     });
 }

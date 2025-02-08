@@ -460,7 +460,7 @@ public:
         clearContentComponent();
     }
 
-    BorderSize<int> getBorderThickness() override
+    BorderSize<int> getBorderThickness()
     {
         return BorderSize<int>(0);
     }

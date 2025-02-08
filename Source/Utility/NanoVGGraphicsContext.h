@@ -23,7 +23,7 @@ public:
     bool isVectorDevice() const override;
     void setOrigin(juce::Point<int>) override;
     void addTransform(juce::AffineTransform const&) override;
-    float getPhysicalPixelScaleFactor() override;
+    float getPhysicalPixelScaleFactor() const override;
     void setPhysicalPixelScaleFactor(float newScale);
 
     bool clipToRectangle(juce::Rectangle<int> const&) override;
@@ -59,8 +59,8 @@ public:
 
     void setFont(juce::Font const&) override;
     juce::Font const& getFont() override;
-    void drawGlyph(int glyphNumber, juce::AffineTransform const&) override;
-    bool drawTextLayout(juce::AttributedString const&, juce::Rectangle<float> const&) override;
+    void drawGlyphs(juce::Span<const uint16_t> glyphNumbers, juce::Span<const juce::Point<float>> positions, juce::AffineTransform const& transform) override;
+    // bool drawTextLayout(juce::AttributedString const&, juce::Rectangle<float> const&) override;
 
     void removeCachedImages();
 
@@ -70,6 +70,8 @@ public:
 
     static juce::String const defaultTypefaceName;
     static int const imageCacheSize;
+
+    uint64_t getFrameId() const override;
 
 private:
     juce::juce_wchar getCharForGlyph(int glyphIndex);

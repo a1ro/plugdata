@@ -50,7 +50,7 @@ void NanoVGGraphicsContext::addTransform(juce::AffineTransform const& t)
     nvgTransform(nvg, t.mat00, t.mat10, t.mat01, t.mat11, t.mat02, t.mat12);
 }
 
-float NanoVGGraphicsContext::getPhysicalPixelScaleFactor() { return scale; }
+float NanoVGGraphicsContext::getPhysicalPixelScaleFactor() const { return scale; }
 
 void NanoVGGraphicsContext::setPhysicalPixelScaleFactor(float const newScale) { scale = newScale; }
 
@@ -395,7 +395,7 @@ void NanoVGGraphicsContext::setFont(juce::Font const& f)
 
             juce::Array<int> glyphs;
             juce::Array<float> offsets;
-            tf->getGlyphPositions(allPrintableAsciiCharacters, glyphs, offsets);
+            // tf->getGlyphPositions(allPrintableAsciiCharacters, glyphs, offsets);
 
             auto const* wstr = allPrintableAsciiCharacters.toWideCharPointer();
             for (int i = 0; i < allPrintableAsciiCharacters.length(); ++i) {
@@ -427,7 +427,7 @@ juce::juce_wchar NanoVGGraphicsContext::getCharForGlyph(int glyphIndex)
         {
             juce::Array<int> glyphs;
             juce::Array<float> xOffsets;
-            tf->getGlyphPositions(juce::String::charToString(wc), glyphs, xOffsets);
+            // tf->getGlyphPositions(juce::String::charToString(wc), glyphs, xOffsets);
 
             if (glyphs[0] == glyphIndex) {
                 currentGlyphToCharMap->insert({ glyphIndex, wc });
@@ -439,11 +439,11 @@ juce::juce_wchar NanoVGGraphicsContext::getCharForGlyph(int glyphIndex)
     return '?'; // Fallback character
 }
 
-void NanoVGGraphicsContext::drawGlyph(int const glyphNumber, juce::AffineTransform const& transform)
+void NanoVGGraphicsContext::drawGlyphs(juce::Span<const uint16_t> glyphNumbers, juce::Span<const juce::Point<float>> positions, juce::AffineTransform const& transform)
 {
     char txt[8] = { '?', 0, 0, 0, 0, 0, 0, 0 };
 
-    juce::juce_wchar const wc = getCharForGlyph(glyphNumber);
+    juce::juce_wchar const wc = getCharForGlyph(glyphNumbers[0]);
 
     juce::CharPointer_UTF8 utf8(txt);
     utf8.write(wc);
@@ -457,64 +457,64 @@ void NanoVGGraphicsContext::drawGlyph(int const glyphNumber, juce::AffineTransfo
     nvgRestore(nvg);
 }
 
-bool NanoVGGraphicsContext::drawTextLayout(juce::AttributedString const& str, juce::Rectangle<float> const& rect)
-{
-    nvgSave(nvg);
-    nvgIntersectScissor(nvg, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+// bool NanoVGGraphicsContext::drawTextLayout(juce::AttributedString const& str, juce::Rectangle<float> const& rect)
+// {
+//     nvgSave(nvg);
+//     nvgIntersectScissor(nvg, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
 
-    std::string const text = str.getText().toStdString();
-    char const* textPtr = text.c_str();
+//     std::string const text = str.getText().toStdString();
+//     char const* textPtr = text.c_str();
 
-    // NOTE:
-    // This will not perform the correct rendering when JUCE's assumed font
-    // differs from the one set by nanovg. It will probably look readable
-    // and so, by if in editor, cursor position may be off because of
-    // different font metrics. This should be fixed by using the same
-    // fonts between JUCE and nanovg rendered.
-    //
-    // JUCE 6's default fonts on desktop are:
-    //  Sans-serif: Verdana
-    //  Serif:      Times New Roman
-    //  Monospace:  Lucida Console
+//     // NOTE:
+//     // This will not perform the correct rendering when JUCE's assumed font
+//     // differs from the one set by nanovg. It will probably look readable
+//     // and so, by if in editor, cursor position may be off because of
+//     // different font metrics. This should be fixed by using the same
+//     // fonts between JUCE and nanovg rendered.
+//     //
+//     // JUCE 6's default fonts on desktop are:
+//     //  Sans-serif: Verdana
+//     //  Serif:      Times New Roman
+//     //  Monospace:  Lucida Console
 
-    float x = rect.getX();
-    float const y = rect.getY();
+//     float x = rect.getX();
+//     float const y = rect.getY();
 
-    auto const just = str.getJustification();
-    int nvgJust = 0;
+//     auto const just = str.getJustification();
+//     int nvgJust = 0;
 
-    if (just.testFlags(juce::Justification::top))
-        nvgJust |= NVG_ALIGN_TOP;
-    else if (just.testFlags(juce::Justification::verticallyCentred))
-        nvgJust |= NVG_ALIGN_MIDDLE;
-    else if (just.testFlags(juce::Justification::bottom))
-        nvgJust |= NVG_ALIGN_BOTTOM;
+//     if (just.testFlags(juce::Justification::top))
+//         nvgJust |= NVG_ALIGN_TOP;
+//     else if (just.testFlags(juce::Justification::verticallyCentred))
+//         nvgJust |= NVG_ALIGN_MIDDLE;
+//     else if (just.testFlags(juce::Justification::bottom))
+//         nvgJust |= NVG_ALIGN_BOTTOM;
 
-    if (just.testFlags(juce::Justification::left))
-        nvgJust |= NVG_ALIGN_LEFT;
-    else if (just.testFlags(juce::Justification::horizontallyCentred))
-        nvgJust |= NVG_ALIGN_CENTER;
-    else if (just.testFlags(juce::Justification::bottom))
-        nvgJust |= NVG_ALIGN_RIGHT;
+//     if (just.testFlags(juce::Justification::left))
+//         nvgJust |= NVG_ALIGN_LEFT;
+//     else if (just.testFlags(juce::Justification::horizontallyCentred))
+//         nvgJust |= NVG_ALIGN_CENTER;
+//     else if (just.testFlags(juce::Justification::bottom))
+//         nvgJust |= NVG_ALIGN_RIGHT;
 
-    nvgTextAlign(nvg, nvgJust);
+//     nvgTextAlign(nvg, nvgJust);
 
-    for (int i = 0; i < str.getNumAttributes(); ++i) {
-        auto const attr = str.getAttribute(i);
-        setFont(attr.font);
-        nvgFillColor(nvg, nvgColour(attr.colour));
+//     for (int i = 0; i < str.getNumAttributes(); ++i) {
+//         auto const attr = str.getAttribute(i);
+//         setFont(attr.font);
+//         nvgFillColor(nvg, nvgColour(attr.colour));
 
-        char const* begin = &textPtr[attr.range.getStart()];
-        char const* end = &textPtr[attr.range.getEnd()];
+//         char const* begin = &textPtr[attr.range.getStart()];
+//         char const* end = &textPtr[attr.range.getEnd()];
 
-        // We assume that ranges are sorted by x so that we can move
-        // to the next glyph position efficiently.
-        x = nvgText(nvg, x, y, begin, end);
-    }
+//         // We assume that ranges are sorted by x so that we can move
+//         // to the next glyph position efficiently.
+//         x = nvgText(nvg, x, y, begin, end);
+//     }
 
-    nvgRestore(nvg);
-    return true;
-}
+//     nvgRestore(nvg);
+//     return true;
+// }
 
 void NanoVGGraphicsContext::removeCachedImages()
 {
@@ -538,6 +538,8 @@ bool NanoVGGraphicsContext::loadFont(juce::String const& name, char const* ptr, 
 
     return false;
 }
+
+uint64_t NanoVGGraphicsContext::getFrameId() const { /* New in JUCE 8 */ }
 
 int NanoVGGraphicsContext::getNvgImageId(juce::Image const& image)
 {
